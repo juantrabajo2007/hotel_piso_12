@@ -9,16 +9,21 @@ export function AnimatedCounter({ value, duration = 1400 }: { value: number; dur
     const element = ref.current;
     if (!element || inView) return;
 
+    if (!(window as any).IntersectionObserver) {
+      setInView(true);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry.isIntersecting || entry.intersectionRatio > 0) {
           setInView(true);
           observer.disconnect();
         }
       },
       {
-        rootMargin: "-50px",
-        threshold: 0.1,
+        rootMargin: "0px",
+        threshold: 0,
       },
     );
 
@@ -28,6 +33,7 @@ export function AnimatedCounter({ value, duration = 1400 }: { value: number; dur
 
   useEffect(() => {
     if (!inView) return;
+
     const start = performance.now();
     let raf = 0;
 
