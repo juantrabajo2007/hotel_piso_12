@@ -9,6 +9,12 @@ import { toast } from "sonner";
 
 const today = new Date().toISOString().split("T")[0];
 
+const parseLocalDate = (value: string) => new Date(`${value}T00:00:00`);
+const formatLocalDate = (value: string) => {
+  const [year, month, day] = value.split("-");
+  return `${day}/${month}/${year}`;
+};
+
 const schema = z
   .object({
     roomType: z.string().min(1, "Selecciona tipo de habitación"),
@@ -17,7 +23,7 @@ const schema = z
     checkOut: z.string().min(1, "Selecciona fecha de salida"),
     name: z.string().min(2, "Ingresa tu nombre"),
   })
-  .refine((d) => new Date(d.checkOut) > new Date(d.checkIn), {
+  .refine((d) => parseLocalDate(d.checkOut) > parseLocalDate(d.checkIn), {
     message: "La salida debe ser posterior al ingreso",
     path: ["checkOut"],
   });
@@ -50,8 +56,8 @@ export function BookingForm() {
 Tipo de habitación: ${ROOM_TYPES.find((r) => r.value === data.roomType)?.label}
 Nombre: ${data.name}
 Huéspedes: ${data.guests}
-Llegada: ${new Date(data.checkIn).toLocaleDateString("es-CO")}
-Salida: ${new Date(data.checkOut).toLocaleDateString("es-CO")}`;
+Llegada: ${formatLocalDate(data.checkIn)}
+Salida: ${formatLocalDate(data.checkOut)}`;
 
     const whatsappUrl = `https://wa.me/573239665038?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, "_blank");
@@ -85,7 +91,7 @@ Salida: ${new Date(data.checkOut).toLocaleDateString("es-CO")}`;
         >
           <select
             {...register("roomType")}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {ROOM_TYPES.map((room) => (
               <option key={room.value} value={room.value}>
